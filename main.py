@@ -2,18 +2,20 @@ from fastapi import FastAPI, Query
 from typing import List, Optional
 from gmail_reader import gmail_login_and_fetch
 
-app = FastAPI(
-    title="Gmail Reader API",
-    description="API لجلب رسائل Gmail مع إمكانية فلترة المرسلين مثل (Facebook, Twitter...)",
-    version="1.0"
-)
+app = FastAPI()
 
 @app.get("/emails")
 def get_emails(
-    max_results: int = 50,
-    filter_senders: Optional[List[str]] = Query(default=None, description="فلترة حسب كلمات أو أسماء مرسلين")
+    filter_senders: Optional[List[str]] = Query(default=None),
+    confirmation_only: Optional[bool] = True
 ):
-    emails = gmail_login_and_fetch(max_results=max_results, filter_senders=filter_senders)
+    # نحدد max_results من داخل الكود مباشرة
+    emails = gmail_login_and_fetch(
+        max_results=20,
+        filter_senders=filter_senders,
+        confirmation_only=confirmation_only
+    )
+
     output = []
     for m in emails:
         hdrs = {h['name']: h['value'] for h in m['headers']}
@@ -23,4 +25,5 @@ def get_emails(
             "date": hdrs.get("Date"),
             "snippet": m["snippet"]
         })
+
     return output
