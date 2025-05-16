@@ -4,11 +4,9 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# نطاق القراءة فقط
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-def gmail_login_and_fetch(user_id='me', max_results=20, filter_senders=None, confirmation_only=True):
-
+def gmail_fetch_filtered_confirmations(user_id='me', filter_senders=None):
     creds = None
     if os.path.exists('token2.json'):
         creds = Credentials.from_authorized_user_file('token2.json', SCOPES)
@@ -22,10 +20,10 @@ def gmail_login_and_fetch(user_id='me', max_results=20, filter_senders=None, con
             token.write(creds.to_json())
 
     service = build('gmail', 'v1', credentials=creds)
-    results = service.users().messages().list(userId=user_id, maxResults=max_results).execute()
+    results = service.users().messages().list(userId=user_id, maxResults=20).execute()
     messages = results.get('messages', [])
 
-    fetched = []
+    matched = []
     for msg in messages:
         m = service.users().messages().get(
             userId=user_id,
@@ -35,18 +33,30 @@ def gmail_login_and_fetch(user_id='me', max_results=20, filter_senders=None, con
         ).execute()
 
         headers = m.get('payload', {}).get('headers', [])
-        hdr_dict = {h['name']: h['value'] for h in headers}
-        sender = hdr_dict.get('From', '')
+        hdrs = {h['name']: h['value'] for h in headers}
+        subject = hdrs.get('Subject', '')
+        sender = hdrs.get('From', '')
+        snippet = m.get('snippet', '')
 
+        # تحقق من وجود "confirmation code" في الموضوع أو المقطع
+        if "confirmation code" not in (subject + snippet).lower():
+            continue
+
+        # فلترة المرسل إذا تم تحديدها
         if filter_senders:
-            if not any(f.lower() in sender.lower() for f in filter_senders):
+            found = False
+            for keyword in filter_senders:
+                if keyword.lower() in sender.lower() and "registration" in sender.lower():
+                    found = True
+                    break
+            if not found:
                 continue
 
-        fetched.append({
-            'id': msg['id'],
-            'threadId': m.get('threadId'),
-            'snippet': m.get('snippet'),
-            'headers': headers
+        matched.append({
+            "from": sender,
+            "subject": subject,
+            "date": hdrs.get("Date"),
+            "snippet": snippet
         })
 
-    return fetched
+    return matched
