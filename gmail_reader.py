@@ -7,16 +7,8 @@ from googleapiclient.discovery import build
 # نطاق القراءة فقط
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-def gmail_login_and_fetch(user_id='me', max_results=100, filter_senders=None):
-    """
-    تسجيل الدخول إلى Gmail وجلب الرسائل مع خيار الفلترة حسب المرسل.
-    Args:
-        user_id: المستخدم، عادةً 'me'
-        max_results: الحد الأقصى لعدد الرسائل
-        filter_senders: قائمة كلمات أو أسماء مرسلين لتصفية النتائج
-    Returns:
-        قائمة من الرسائل مفلترة
-    """
+def gmail_login_and_fetch(user_id='me', max_results=20, filter_senders=None, confirmation_only=True):
+
     creds = None
     if os.path.exists('token2.json'):
         creds = Credentials.from_authorized_user_file('token2.json', SCOPES)
