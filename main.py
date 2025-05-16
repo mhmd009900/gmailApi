@@ -9,7 +9,6 @@ def get_emails(
     filter_senders: Optional[List[str]] = Query(default=None),
     confirmation_only: Optional[bool] = True
 ):
-    # نحدد max_results من داخل الكود مباشرة
     emails = gmail_login_and_fetch(
         max_results=20,
         filter_senders=filter_senders,
