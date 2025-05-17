@@ -10,7 +10,7 @@ def get_emails(
     confirmation_only: Optional[bool] = True
 ):
     emails = gmail_login_and_fetch(
-        max_results=20,
+        max_results=10,
         filter_senders=filter_senders,
         confirmation_only=confirmation_only
     )
