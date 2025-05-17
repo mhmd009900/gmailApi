@@ -7,7 +7,7 @@ from googleapiclient.discovery import build
 # إذا أردت فقط قراءة الرسائل:
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-def gmail_login_and_fetch(user_id='me', max_results=100):
+def gmail_login_and_fetch(user_id='me', max_results=10):
     """
     يفتح صلاحيات Gmail API ثم يستدعي رسائل البريد.
     Args:
@@ -58,7 +58,7 @@ def gmail_login_and_fetch(user_id='me', max_results=100):
     return fetched
 
 if __name__ == '__main__':
-    msgs = gmail_login_and_fetch(max_results=50)
+    msgs = gmail_login_and_fetch(max_results=10)
     for m in msgs:
         # استخراج العنوان والمرسل
         hdrs = {h['name']: h['value'] for h in m['headers']}
