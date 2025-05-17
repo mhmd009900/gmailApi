@@ -19,10 +19,10 @@ def get_emails(
     for m in emails:
         hdrs = {h['name']: h['value'] for h in m['headers']}
         output.append({
-            "from": hdrs.get("From"),
+            
             "subject": hdrs.get("Subject"),
             "date": hdrs.get("Date"),
-            "snippet": m["snippet"]
+            
         })
 
     return output
